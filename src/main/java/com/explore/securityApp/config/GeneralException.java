@@ -1,6 +1,7 @@
 package com.explore.securityApp.config;
 
 import com.explore.securityApp.dto.ApiResponse;
+import com.explore.securityApp.exception.AlreadyExistException;
 import com.explore.securityApp.exception.BadRequestException;
 import com.explore.securityApp.exception.NotFoundException;
 import com.explore.securityApp.exception.UnauthorizedException;
@@ -43,5 +44,11 @@ public class GeneralException {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(400, message));
+    }
+
+    @ExceptionHandler(AlreadyExistException.class)
+    public ResponseEntity<ApiResponse<?>> handleAlreadyExist(AlreadyExistException ex){
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(409,ex.getMessage()));
     }
 }

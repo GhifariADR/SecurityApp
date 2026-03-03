@@ -4,8 +4,10 @@ import com.explore.securityApp.dto.ApiResponse;
 import com.explore.securityApp.dto.auth.LoginRequest;
 import com.explore.securityApp.dto.auth.LoginResponse;
 import com.explore.securityApp.dto.auth.RefreshTokenRequest;
+import com.explore.securityApp.dto.auth.RegisterRequest;
 import com.explore.securityApp.entity.RefreshToken;
 import com.explore.securityApp.entity.User;
+import com.explore.securityApp.exception.AlreadyExistException;
 import com.explore.securityApp.exception.BadRequestException;
 import com.explore.securityApp.exception.NotFoundException;
 import com.explore.securityApp.exception.UnauthorizedException;
@@ -74,6 +76,28 @@ public class AuthService {
         String newAccessToken = jwtUtil.generateAccessToken(username);
 
         return ApiResponse.success("Success", newAccessToken);
+
+    }
+
+    public ApiResponse<?> register(RegisterRequest request){
+
+        if (userRepository.findByUsername(request.getUsername()).isPresent()){
+            throw new AlreadyExistException("Username already exist");
+        }
+
+        if (userRepository.findByEmail(request.getEmail()).isPresent()){
+            throw new AlreadyExistException("Email already exist");
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setEmail(request.getEmail());
+        user.setRole("USER");
+
+        userRepository.save(user);
+
+        return ApiResponse.success("Success",null);
 
     }
 }
