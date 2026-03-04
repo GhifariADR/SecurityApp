@@ -1,10 +1,14 @@
 package com.explore.securityApp.util;
 
+import com.explore.securityApp.enums.UserRole;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -17,6 +21,16 @@ public class JWTUtil {
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis()+ 900000))
+                .signWith(SignatureAlgorithm.HS512, secret)
+                .compact();
+    }
+
+    public String generateAccessToken(String username, UserRole role){
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("role", role.name())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 900000))
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }
@@ -36,6 +50,16 @@ public class JWTUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .getExpiration().before(new Date());
+    }
+
+
+
+    public String extractRole(String token){
+        return Jwts.parser()
+                .setSigningKey(secret)
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
     }
 
     public String generateRefreshToken(){

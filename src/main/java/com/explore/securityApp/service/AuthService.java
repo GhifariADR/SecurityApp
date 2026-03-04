@@ -7,6 +7,7 @@ import com.explore.securityApp.dto.auth.RefreshTokenRequest;
 import com.explore.securityApp.dto.auth.RegisterRequest;
 import com.explore.securityApp.entity.RefreshToken;
 import com.explore.securityApp.entity.User;
+import com.explore.securityApp.enums.UserRole;
 import com.explore.securityApp.exception.AlreadyExistException;
 import com.explore.securityApp.exception.BadRequestException;
 import com.explore.securityApp.exception.NotFoundException;
@@ -45,7 +46,7 @@ public class AuthService {
             throw new UnauthorizedException("Invalid Credential");
         }
 
-        String accessToken = jwtUtil.generateAccessToken(request.getUsername());
+        String accessToken = jwtUtil.generateAccessToken(request.getUsername(), user.getRole());
         String refreshToken = jwtUtil.generateRefreshToken();
 
         RefreshToken tokenEntity = new RefreshToken();
@@ -73,7 +74,7 @@ public class AuthService {
 
         String username = refreshToken.getUser().getUsername();
 
-        String newAccessToken = jwtUtil.generateAccessToken(username);
+        String newAccessToken = jwtUtil.generateAccessToken(username, refreshToken.getUser().getRole());
 
         return ApiResponse.success("Success", newAccessToken);
 
@@ -93,7 +94,7 @@ public class AuthService {
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
-        user.setRole("USER");
+        user.setRole(UserRole.USER);
 
         userRepository.save(user);
 

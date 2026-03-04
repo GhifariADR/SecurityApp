@@ -25,6 +25,7 @@ public class Room {
 
     private Integer capacity;
 
+    @Enumerated(EnumType.STRING)
     private RoomStatus status;
 
     @Column(name = "created_at")
@@ -32,5 +33,16 @@ public class Room {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate(){
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate(){
+        updatedAt = LocalDateTime.now();
+    }
 
 }
