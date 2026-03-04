@@ -3,8 +3,10 @@ package com.explore.securityApp.service;
 import com.explore.securityApp.dto.ApiResponse;
 import com.explore.securityApp.dto.auth.LoginRequest;
 import com.explore.securityApp.dto.auth.RefreshTokenRequest;
+import com.explore.securityApp.dto.auth.RegisterRequest;
 import com.explore.securityApp.entity.RefreshToken;
 import com.explore.securityApp.entity.User;
+import com.explore.securityApp.exception.AlreadyExistException;
 import com.explore.securityApp.exception.BadRequestException;
 import com.explore.securityApp.exception.NotFoundException;
 import com.explore.securityApp.exception.UnauthorizedException;
@@ -50,6 +52,7 @@ class AuthServiceTest {
     private LoginRequest request;
     private RefreshToken refreshToken;
     private RefreshTokenRequest refreshTokenRequest;
+    private RegisterRequest registerRequest;
 
 
 
@@ -123,7 +126,6 @@ class AuthServiceTest {
     }
 
     @Nested
-    @ExtendWith(MockitoExtension.class)
     class RefreshTokenTest{
 
         @BeforeEach
@@ -193,6 +195,55 @@ class AuthServiceTest {
 
     }
 
+    @Nested
+    class RegisterTest {
+
+        @BeforeEach
+        void setup(){
+            registerRequest = new RegisterRequest();
+            registerRequest.setEmail("test@mail.com");
+            registerRequest.setPassword("12345");
+            registerRequest.setUsername("testing");
+            registerRequest.setRole("USER");
+
+        }
+
+        @Test
+        void register_success(){
+            when(userRepository.findByUsername("testing"))
+                    .thenReturn(Optional.empty());
+
+            when(userRepository.findByEmail("test@mail.com"))
+                    .thenReturn(Optional.empty());
+
+            when(passwordEncoder.encode("12345"))
+                    .thenReturn("encodedPassword");
+
+            ApiResponse<?> response = authService.register(registerRequest);
+
+            assertNotNull(response);
+            assertEquals("Success", response.getMessage());
+            verify(userRepository).save(any(User.class));
+        }
+
+        @Test
+        void register_username_already_exist(){
+            when(userRepository.findByUsername("testing"))
+                    .thenReturn(Optional.of(new User()));
+
+            assertThrows(AlreadyExistException.class,() -> authService.register(registerRequest));
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        void register_email_already_exist(){
+            when(userRepository.findByEmail("test@mail.com"))
+                    .thenReturn(Optional.of(new User()));
+
+            assertThrows(AlreadyExistException.class,() -> authService.register(registerRequest));
+            verify(userRepository, never()).save(any());
+        }
+    }
 
 
 }
