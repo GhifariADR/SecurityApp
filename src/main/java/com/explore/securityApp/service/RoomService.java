@@ -2,10 +2,7 @@ package com.explore.securityApp.service;
 
 import com.explore.securityApp.dto.ApiResponse;
 import com.explore.securityApp.dto.auth.RegisterRequest;
-import com.explore.securityApp.dto.room.RoomAvailabilityItem;
-import com.explore.securityApp.dto.room.RoomAvailabilityRequest;
-import com.explore.securityApp.dto.room.RoomAvailabilityResponse;
-import com.explore.securityApp.dto.room.RoomRegisterRequest;
+import com.explore.securityApp.dto.room.*;
 import com.explore.securityApp.entity.Booking;
 import com.explore.securityApp.entity.Room;
 import com.explore.securityApp.enums.BookingStatus;
@@ -50,14 +47,18 @@ public class RoomService {
 
     public ApiResponse<?> getAvailability(RoomAvailabilityRequest request){
 
-        List<Room> rooms = roomRepository.findAll();
+        List<Room> rooms = roomRepository.findAllByStatus(RoomStatus.AVAILABLE);
         List<RoomAvailabilityItem> result = new ArrayList<>();
 
+        List<BookingStatus> statuses = new ArrayList<>();
+        statuses.add(BookingStatus.APPROVED);
+        statuses.add(BookingStatus.PENDING);
+
         for(Room room : rooms){
-            List<Booking> bookings = bookingRepository.findByRoomIdAndBookingDateAndStatus(
+            List<Booking> bookings = bookingRepository.findByRoomIdAndBookingDateAndStatusIn(
                     room.getId(),
                     request.getDate(),
-                    BookingStatus.APPROVED
+                    statuses
             );
 
             List<LocalTime> availableSlot = generateSlots();
@@ -71,9 +72,11 @@ public class RoomService {
                 }
             }
 
-            List<String> availableSlots = availableSlot.stream()
-                    .filter(slot -> !bookedSlot.contains(slot))
-                    .map(LocalTime::toString)
+            List<RoomAvailableSlots> availableSlots = availableSlot.stream()
+                    .map(slot -> new RoomAvailableSlots(
+                            slot.toString(),
+                            !bookedSlot.contains(slot)
+                    ))
                     .collect(Collectors.toList());
 
             result.add(
@@ -88,9 +91,9 @@ public class RoomService {
 
         RoomAvailabilityResponse responses = new RoomAvailabilityResponse();
         responses.setDate(request.getDate());
-        responses.setItems(result);
+        responses.setRoomAvailability(result);
 
-        return ApiResponse.success("Successs", responses);
+        return ApiResponse.success("Success", responses);
 
     }
 
@@ -107,4 +110,5 @@ public class RoomService {
         return slots;
 
     }
+
 }

@@ -14,9 +14,9 @@ import java.util.Optional;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    List<Booking> findByRoomIdAndBookingDateAndStatus(
+    List<Booking> findByRoomIdAndBookingDateAndStatusIn(
             Long roomId,
             LocalDate date,
-            BookingStatus status
+            List<BookingStatus> statuses
     );
 }

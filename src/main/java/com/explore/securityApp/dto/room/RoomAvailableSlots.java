@@ -5,15 +5,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalTime;
 
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoomAvailabilityResponse {
+public class RoomAvailableSlots {
 
-    private LocalDate date;
-    private List<RoomAvailabilityItem> roomAvailability;
+    private String time;
+    private boolean isAvailable;
+
 }

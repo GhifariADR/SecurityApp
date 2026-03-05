@@ -14,5 +14,5 @@ import java.util.List;
 public class RoomAvailabilityItem {
     private Long roomId;
     private String roomName;
-    private List<String> availableSlots;
+    private List<RoomAvailableSlots> availableSlots;
 }
