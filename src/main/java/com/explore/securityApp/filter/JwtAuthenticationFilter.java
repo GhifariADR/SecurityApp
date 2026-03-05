@@ -80,8 +80,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         authorities);
 
         SecurityContextHolder.getContext().setAuthentication(auth);
-
-        logger.info("Authenticated user: " + username);
     }
 }
 

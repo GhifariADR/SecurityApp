@@ -68,7 +68,7 @@ public class RoomService {
                 LocalTime start = booking.getStartTime();
                 while (start.isBefore(booking.getEndTime())){
                     bookedSlot.add(start);
-                    start.plusHours(1);
+                    start = start.plusHours(1);
                 }
             }
 
