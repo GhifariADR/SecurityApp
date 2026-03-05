@@ -2,19 +2,34 @@ package com.explore.securityApp.service;
 
 import com.explore.securityApp.dto.ApiResponse;
 import com.explore.securityApp.dto.auth.RegisterRequest;
+import com.explore.securityApp.dto.room.RoomAvailabilityItem;
+import com.explore.securityApp.dto.room.RoomAvailabilityRequest;
+import com.explore.securityApp.dto.room.RoomAvailabilityResponse;
 import com.explore.securityApp.dto.room.RoomRegisterRequest;
+import com.explore.securityApp.entity.Booking;
 import com.explore.securityApp.entity.Room;
+import com.explore.securityApp.enums.BookingStatus;
 import com.explore.securityApp.enums.RoomStatus;
 import com.explore.securityApp.exception.AlreadyExistException;
+import com.explore.securityApp.repository.BookingRepository;
 import com.explore.securityApp.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.awt.print.Book;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RoomService {
 
     @Autowired
     private RoomRepository roomRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
 
     public ApiResponse<?> register(RoomRegisterRequest request){
 
@@ -30,6 +45,66 @@ public class RoomService {
         roomRepository.save(room);
 
         return ApiResponse.success("Room successfully created", null);
+
+    }
+
+    public ApiResponse<?> getAvailability(RoomAvailabilityRequest request){
+
+        List<Room> rooms = roomRepository.findAll();
+        List<RoomAvailabilityItem> result = new ArrayList<>();
+
+        for(Room room : rooms){
+            List<Booking> bookings = bookingRepository.findByRoomIdAndBookingDateAndStatus(
+                    room.getId(),
+                    request.getDate(),
+                    BookingStatus.APPROVED
+            );
+
+            List<LocalTime> availableSlot = generateSlots();
+            List<LocalTime> bookedSlot = new ArrayList<>();
+
+            for (Booking booking : bookings){
+                LocalTime start = booking.getStartTime();
+                while (start.isBefore(booking.getEndTime())){
+                    bookedSlot.add(start);
+                    start.plusHours(1);
+                }
+            }
+
+            List<String> availableSlots = availableSlot.stream()
+                    .filter(slot -> !bookedSlot.contains(slot))
+                    .map(LocalTime::toString)
+                    .collect(Collectors.toList());
+
+            result.add(
+                    new RoomAvailabilityItem(
+                            room.getId(),
+                            room.getName(),
+                            availableSlots
+                    )
+            );
+
+        }
+
+        RoomAvailabilityResponse responses = new RoomAvailabilityResponse();
+        responses.setDate(request.getDate());
+        responses.setItems(result);
+
+        return ApiResponse.success("Successs", responses);
+
+    }
+
+    public List<LocalTime> generateSlots(){
+        List<LocalTime> slots = new ArrayList<>();
+        LocalTime start = LocalTime.of(8,0);
+        LocalTime end = LocalTime.of(17,0);
+
+        while (start.isBefore(end)){
+            slots.add(start);
+            start = start.plusHours(1);
+        }
+
+        return slots;
 
     }
 }

@@ -1,4 +1,4 @@
-package com.explore.securityApp.config;
+package com.explore.securityApp.filter;
 
 import com.explore.securityApp.util.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;

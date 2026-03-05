@@ -1,6 +1,7 @@
 package com.explore.securityApp.controller;
 
 import com.explore.securityApp.dto.ApiResponse;
+import com.explore.securityApp.dto.room.RoomAvailabilityRequest;
 import com.explore.securityApp.dto.room.RoomRegisterRequest;
 import com.explore.securityApp.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,12 @@ public class RoomController {
     public ResponseEntity<ApiResponse<?>> roomRegister(@Valid @RequestBody RoomRegisterRequest request){
         return ResponseEntity.ok().body(roomService.register(request));
     }
+
+    @PostMapping("/getAvailability")
+    public ResponseEntity<ApiResponse<?>> getAvailability(@Valid @RequestBody RoomAvailabilityRequest request){
+        return ResponseEntity.ok().body(roomService.getAvailability(request));
+    }
+
 
     @GetMapping("/test")
     public String test(Authentication authentication) {

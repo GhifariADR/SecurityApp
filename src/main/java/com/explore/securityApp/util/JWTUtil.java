@@ -6,10 +6,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JWTUtil {
@@ -20,7 +23,8 @@ public class JWTUtil {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis()+ 900000))
+                .setExpiration(new Date(System.currentTimeMillis() +
+                        TimeUnit.MINUTES.toMillis(30)))
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }
@@ -30,7 +34,8 @@ public class JWTUtil {
                 .setSubject(username)
                 .claim("role", role.name())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 900000))
+                .setExpiration(new Date(System.currentTimeMillis() +
+                TimeUnit.MINUTES.toMillis(30)))
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }

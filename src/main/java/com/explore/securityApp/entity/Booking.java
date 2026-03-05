@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "bookings")
@@ -30,13 +32,14 @@ public class Booking {
     private Room room;
 
     @Column(name = "booking_date", nullable = false)
-    private LocalDateTime bookingDate;
+    private LocalDate bookingDate;
 
-    @Column(name = "start_date" , nullable = false)
-    private LocalDateTime startTime;
+    @Column(name = "start_time" , nullable = false)
+    private LocalTime startTime;
 
-    @Column(name = "end_date" , nullable = false)
-    private LocalDateTime endTime;
+    @Column(name = "end_time" , nullable = false)
+    private LocalTime endTime;
 
+    @Enumerated(EnumType.STRING)
     private BookingStatus status;
 }
