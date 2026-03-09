@@ -4,16 +4,22 @@ import com.explore.securityApp.dto.ApiResponse;
 import com.explore.securityApp.dto.auth.RegisterRequest;
 import com.explore.securityApp.dto.room.*;
 import com.explore.securityApp.entity.Booking;
+import com.explore.securityApp.entity.PriceInfo;
 import com.explore.securityApp.entity.Room;
 import com.explore.securityApp.enums.BookingStatus;
+import com.explore.securityApp.enums.PriceType;
 import com.explore.securityApp.enums.RoomStatus;
 import com.explore.securityApp.exception.AlreadyExistException;
+import com.explore.securityApp.exception.NotFoundException;
 import com.explore.securityApp.repository.BookingRepository;
 import com.explore.securityApp.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.print.Book;
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +53,10 @@ public class RoomService {
 
     public ApiResponse<?> getAvailability(RoomAvailabilityRequest request){
 
+        if (request.getDate().isBefore(LocalDate.now())){
+            throw new NotFoundException("Selected date is before the current date");
+        }
+
         List<Room> rooms = roomRepository.findAllByStatus(RoomStatus.AVAILABLE);
         List<RoomAvailabilityItem> result = new ArrayList<>();
 
@@ -79,10 +89,19 @@ public class RoomService {
                     ))
                     .collect(Collectors.toList());
 
+
+
+            BigDecimal price = room.getPriceInfo().stream()
+                            .filter(p -> p.getPriceType()
+                                    .equals(isWeekend(request.getDate()) ? PriceType.WEEKEND : PriceType.WEEKDAY))
+                                    .findFirst()
+                                            .orElseThrow(() -> new NotFoundException("Price Not Found")).getPrice();
+
             result.add(
                     new RoomAvailabilityItem(
                             room.getId(),
                             room.getName(),
+                            price,
                             availableSlots
                     )
             );
@@ -108,6 +127,13 @@ public class RoomService {
         }
 
         return slots;
+
+    }
+
+    public boolean isWeekend(LocalDate date){
+        DayOfWeek day = date.getDayOfWeek();
+
+        return day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;
 
     }
 

@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "rooms")
@@ -27,6 +28,9 @@ public class Room {
 
     @Enumerated(EnumType.STRING)
     private RoomStatus status;
+
+    @OneToMany(mappedBy = "room")
+    private List<PriceInfo> priceInfo;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
