@@ -1,10 +1,8 @@
 package com.explore.securityApp.service;
 
 import com.explore.securityApp.dto.ApiResponse;
-import com.explore.securityApp.dto.auth.RegisterRequest;
 import com.explore.securityApp.dto.room.*;
 import com.explore.securityApp.entity.Booking;
-import com.explore.securityApp.entity.PriceInfo;
 import com.explore.securityApp.entity.Room;
 import com.explore.securityApp.enums.BookingStatus;
 import com.explore.securityApp.enums.PriceType;
@@ -16,7 +14,6 @@ import com.explore.securityApp.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Book;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -90,7 +87,6 @@ public class RoomService {
                     .collect(Collectors.toList());
 
 
-
             BigDecimal price = room.getPriceInfo().stream()
                             .filter(p -> p.getPriceType()
                                     .equals(isWeekend(request.getDate()) ? PriceType.WEEKEND : PriceType.WEEKDAY))
@@ -109,7 +105,7 @@ public class RoomService {
         }
 
         RoomAvailabilityResponse responses = new RoomAvailabilityResponse();
-        responses.setDate(request.getDate());
+        responses.setBookingDate(request.getDate());
         responses.setRoomAvailability(result);
 
         return ApiResponse.success("Success", responses);

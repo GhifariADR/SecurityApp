@@ -14,6 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 public class RoomAvailabilityResponse {
 
-    private LocalDate date;
+    private LocalDate bookingDate;
     private List<RoomAvailabilityItem> roomAvailability;
 }
