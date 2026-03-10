@@ -10,11 +10,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GeneralException {
+    @ExceptionHandler(AsyncRequestTimeoutException.class)
+    public ResponseEntity<ApiResponse<?>> handleUnauthorized (AsyncRequestTimeoutException ex){
+        return ResponseEntity.status(401)
+                .body(ApiResponse.error(401, ex.getMessage()));
+    }
+
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiResponse<?>> handleUnauthorized (UnauthorizedException ex){

@@ -20,6 +20,7 @@ import com.explore.securityApp.util.BookingCodeGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -46,6 +47,7 @@ public class BookingService {
     @Autowired
     private BookingResponseMapper bookingResponseMapper;
 
+    @Transactional
     public ApiResponse<?> createBooking(CreateBookingRequest request, String username){
 
         User user = userRepository.findByUsername(username)
