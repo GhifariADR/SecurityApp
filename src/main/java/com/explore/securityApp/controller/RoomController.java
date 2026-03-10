@@ -30,9 +30,4 @@ public class RoomController {
         return ResponseEntity.ok().body(roomService.getAvailability(request));
     }
 
-
-    @GetMapping("/test")
-    public String test(Authentication authentication) {
-        return authentication.getAuthorities().toString();
-    }
 }

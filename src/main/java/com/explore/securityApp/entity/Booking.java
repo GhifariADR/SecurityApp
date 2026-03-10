@@ -23,6 +23,9 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "booking_code")
+    private String bookingCode;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

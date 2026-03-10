@@ -32,4 +32,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         LocalTime endTime,
         LocalTime startTime
     );
+
+    Optional<Booking> findByBookingCode(String bookingCode);
 }
