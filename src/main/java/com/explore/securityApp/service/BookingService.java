@@ -4,10 +4,12 @@ import com.explore.securityApp.dto.ApiResponse;
 import com.explore.securityApp.dto.booking.BookingInformation;
 import com.explore.securityApp.dto.booking.CreateBookingRequest;
 import com.explore.securityApp.dto.booking.CreateBookingResponse;
+import com.explore.securityApp.dto.booking.ItineraryPrice;
 import com.explore.securityApp.entity.Booking;
 import com.explore.securityApp.entity.Room;
 import com.explore.securityApp.entity.User;
 import com.explore.securityApp.enums.BookingStatus;
+import com.explore.securityApp.enums.PriceType;
 import com.explore.securityApp.exception.AlreadyExistException;
 import com.explore.securityApp.exception.NotFoundException;
 import com.explore.securityApp.mapper.BookingResponseMapper;
@@ -18,6 +20,9 @@ import com.explore.securityApp.util.BookingCodeGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,11 +69,17 @@ public class BookingService {
             throw new AlreadyExistException("Room already booked in this time range");
         }
 
+        ItineraryPrice itineraryPrice = bookingResponseMapper.constructPrice(room,request);
+
         Booking newBooking = new Booking();
         newBooking.setBookingDate(request.getBookingDate());
         newBooking.setStartTime(request.getStartTime());
         newBooking.setEndTime(request.getEndTime());
         newBooking.setUser(user);
+        newBooking.setBasePricePerHour(itineraryPrice.getBasePricePerHour());
+        newBooking.setSubTotal(itineraryPrice.getSubTotal());
+        newBooking.setServiceFee(itineraryPrice.getServiceFee());
+        newBooking.setTotalPrice(itineraryPrice.getTotalPrice());
         newBooking.setStatus(BookingStatus.PENDING);
         newBooking.setRoom(room);
 
@@ -92,4 +103,5 @@ public class BookingService {
         return ApiResponse.success("Booking found", response);
 
     }
+
 }

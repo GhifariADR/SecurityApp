@@ -24,7 +24,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     );
 
     @Query("select b from Booking b " + "where b.room.id = :roomId "
-            + "and b.bookingDate = :date "+ "and b.status IN :statuses " + "AND (b.startTime < :endTime AND b.endTime > :startTime)")
+            + "and b.bookingDate = :date "+ "and b.status IN :statuses "
+            + "AND (b.startTime < :endTime AND b.endTime > :startTime)")
     List<Booking> findConflictBooking(
         Long roomId,
         LocalDate date,

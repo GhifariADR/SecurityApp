@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -42,6 +43,18 @@ public class Booking {
 
     @Column(name = "end_time" , nullable = false)
     private LocalTime endTime;
+
+    @Column(name = "base_price_per_hours")
+    private BigDecimal basePricePerHour;
+
+    @Column(name = "service_fee")
+    private BigDecimal serviceFee;
+
+    @Column(name = "total_price")
+    private BigDecimal totalPrice;
+
+    @Column(name = "sub_total")
+    private BigDecimal subTotal;
 
     @Enumerated(EnumType.STRING)
     private BookingStatus status;

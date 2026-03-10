@@ -20,6 +20,7 @@ public class CreateBookingResponse {
     private LocalTime startTime;
     private LocalTime endTime;
     private BookingStatus status;
+    private ItineraryPrice price;
     private CreateBookingUser user;
     private CreateBookingRoom room;
 }
