@@ -42,7 +42,7 @@ public class SecurityConfig{
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests(auth -> auth
-                        .antMatchers("/auth/login","/auth/refresh","/auth/register").permitAll()
+                        .antMatchers("/auth/login","/auth/refresh","/auth/register","/payment/callback").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter,

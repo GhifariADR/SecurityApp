@@ -1,12 +1,14 @@
 package com.explore.securityApp.service;
 
 import com.explore.securityApp.dto.ApiResponse;
+import com.explore.securityApp.dto.payment.MidtransNotification;
 import com.explore.securityApp.dto.payment.PaymentRequest;
 import com.explore.securityApp.dto.payment.PaymentResponse;
 import com.explore.securityApp.dto.payment.TransactionDetails;
 import com.explore.securityApp.entity.Booking;
 import com.explore.securityApp.enums.BookingStatus;
 import com.explore.securityApp.exception.AlreadyExistException;
+import com.explore.securityApp.exception.BadRequestException;
 import com.explore.securityApp.exception.NotFoundException;
 import com.explore.securityApp.mapper.PaymentRequestMapper;
 import com.explore.securityApp.repository.BookingRepository;
@@ -15,8 +17,10 @@ import com.midtrans.httpclient.SnapApi;
 import com.midtrans.httpclient.error.MidtransError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +42,8 @@ public class PaymentService {
     @Value("${midtrans.is-production}")
     private boolean IS_PRODUCTION;
 
+
+    @Transactional
     public ApiResponse<?> payBooking(String bookingCode) throws MidtransError {
 
         Booking booking = bookingRepository.findByBookingCode(bookingCode)
@@ -53,7 +59,7 @@ public class PaymentService {
 
         Map<String, Object> paymentRequest = paymentRequestMapper.constructPaymentRequest(booking);
 
-        Config config = new Config(SERVER_KEY, CLIENT_KEY,IS_PRODUCTION );
+        Config config = new Config(SERVER_KEY,CLIENT_KEY,IS_PRODUCTION);
 
         String url = SnapApi.createTransactionRedirectUrl(paymentRequest, config);
 
@@ -61,6 +67,24 @@ public class PaymentService {
         paymentResponse.setRedirect_url(url);
 
         return ApiResponse.success("Success", paymentResponse);
+
+    }
+
+    @Async
+    @Transactional
+    public ApiResponse<?> callback(MidtransNotification midtransNotification) throws MidtransError{
+        Booking booking = bookingRepository.findByBookingCode(midtransNotification.getOrder_id())
+                .orElseThrow(() -> new NotFoundException("Booking not found"));
+
+        String status = midtransNotification.getTransaction_status();
+
+        if ("settlement".equals(status) || "capture".equals(status)) {
+
+            booking.setStatus(BookingStatus.APPROVED);
+            bookingRepository.save(booking);
+        }
+
+        return ApiResponse.success("Booking Processed", null);
 
     }
 }

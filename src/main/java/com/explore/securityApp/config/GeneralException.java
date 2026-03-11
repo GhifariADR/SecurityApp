@@ -32,7 +32,7 @@ public class GeneralException {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiResponse<?>> handleNotFound (NotFoundException ex){
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(500, ex.getMessage()));
+                .body(ApiResponse.error(404, ex.getMessage()));
     }
 
     @ExceptionHandler(BadRequestException.class)

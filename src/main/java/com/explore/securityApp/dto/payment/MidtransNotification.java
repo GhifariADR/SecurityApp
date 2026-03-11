@@ -10,6 +10,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MidtransNotification {
+
+    private String status_code;
     private String order_id;
     private String transaction_status;
     private String payment_type;
