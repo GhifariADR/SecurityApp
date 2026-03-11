@@ -19,7 +19,7 @@ public class BookingController {
 
     @PostMapping("/createBooking")
     public ResponseEntity<ApiResponse<?>> createBooking
-            (@Valid @RequestBody CreateBookingRequest request, Authentication authentication){
+            (@Valid @RequestBody CreateBookingRequest request, Authentication authentication) throws Exception {
         return ResponseEntity.ok(bookingService.createBooking(request, authentication.getName()));
     }
 

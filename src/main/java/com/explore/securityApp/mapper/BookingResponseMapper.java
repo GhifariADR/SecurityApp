@@ -26,6 +26,7 @@ public class BookingResponseMapper {
         createBookingResponse.setStartTime(booking.getStartTime());
         createBookingResponse.setEndTime(booking.getEndTime());
         createBookingResponse.setStatus(booking.getStatus());
+        createBookingResponse.setTimeLimitPayment(booking.getTimeLimitPayment());
 
         CreateBookingUser createBookingUser = new CreateBookingUser();
         createBookingUser.setUsername(booking.getUser().getUsername());

@@ -58,4 +58,7 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
+
+    @Column(name = "time_limit_payment")
+    private LocalDateTime timeLimitPayment;
 }

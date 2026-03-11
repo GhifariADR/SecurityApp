@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Setter
@@ -17,6 +18,7 @@ public class CreateBookingResponse {
 
     private String bookingCode;
     private LocalDate bookingDate;
+    private LocalDateTime timeLimitPayment;
     private LocalTime startTime;
     private LocalTime endTime;
     private BookingStatus status;

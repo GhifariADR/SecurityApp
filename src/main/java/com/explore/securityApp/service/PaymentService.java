@@ -1,10 +1,8 @@
 package com.explore.securityApp.service;
 
+import com.explore.securityApp.config.MidtransWebClientConfiguration;
 import com.explore.securityApp.dto.ApiResponse;
-import com.explore.securityApp.dto.payment.MidtransNotification;
-import com.explore.securityApp.dto.payment.PaymentRequest;
-import com.explore.securityApp.dto.payment.PaymentResponse;
-import com.explore.securityApp.dto.payment.TransactionDetails;
+import com.explore.securityApp.dto.payment.*;
 import com.explore.securityApp.entity.Booking;
 import com.explore.securityApp.enums.BookingStatus;
 import com.explore.securityApp.exception.AlreadyExistException;
@@ -19,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.transaction.Transactional;
 import java.util.HashMap;
@@ -33,6 +32,10 @@ public class PaymentService {
     @Autowired
     private PaymentRequestMapper paymentRequestMapper;
 
+    @Autowired
+    private MidtransWebClientConfiguration midtransWebClientConfiguration;
+
+    private final WebClient webClient;
     @Value("${midtrans.server.key}")
     private String SERVER_KEY;
 
@@ -41,6 +44,10 @@ public class PaymentService {
 
     @Value("${midtrans.is-production}")
     private boolean IS_PRODUCTION;
+
+    public PaymentService(WebClient webClient) {
+        this.webClient = webClient;
+    }
 
 
     @Transactional
@@ -85,6 +92,20 @@ public class PaymentService {
         }
 
         return ApiResponse.success("Booking Processed", null);
+
+    }
+
+    public ApiResponse<?> checkPaymentStatus(String bookingCode) throws MidtransError{
+
+        PaymentStatusResponse paymentStatusResponse =
+                midtransWebClientConfiguration.midtransClient()
+                        .get()
+                        .uri(bookingCode + "/status")
+                        .retrieve()
+                        .bodyToMono(PaymentStatusResponse.class)
+                        .block();
+
+        return ApiResponse.success("Booking Processed", paymentStatusResponse);
 
     }
 }

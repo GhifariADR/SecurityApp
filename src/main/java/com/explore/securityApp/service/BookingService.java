@@ -12,19 +12,20 @@ import com.explore.securityApp.enums.BookingStatus;
 import com.explore.securityApp.enums.PriceType;
 import com.explore.securityApp.exception.AlreadyExistException;
 import com.explore.securityApp.exception.NotFoundException;
+import com.explore.securityApp.job.ExpireBookingJob;
 import com.explore.securityApp.mapper.BookingResponseMapper;
 import com.explore.securityApp.repository.BookingRepository;
 import com.explore.securityApp.repository.RoomRepository;
 import com.explore.securityApp.repository.UserRepository;
 import com.explore.securityApp.util.BookingCodeGenerator;
+import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
-import java.time.Duration;
-import java.time.LocalDate;
+import java.sql.Date;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,9 @@ public class BookingService {
 
     @Autowired
     private BookingRepository bookingRepository;
+
+    @Autowired
+    private final Scheduler scheduler;
 
     @Autowired
     private UserRepository userRepository;
@@ -47,8 +51,12 @@ public class BookingService {
     @Autowired
     private BookingResponseMapper bookingResponseMapper;
 
+    public BookingService(Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
+
     @Transactional
-    public ApiResponse<?> createBooking(CreateBookingRequest request, String username){
+    public ApiResponse<?> createBooking(CreateBookingRequest request, String username) throws Exception {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("User Not Found"));
@@ -84,6 +92,7 @@ public class BookingService {
         newBooking.setTotalPrice(itineraryPrice.getTotalPrice());
         newBooking.setStatus(BookingStatus.PENDING);
         newBooking.setRoom(room);
+        newBooking.setTimeLimitPayment(LocalDateTime.now().plusHours(12));
 
         String bookingCode = bookingCodeGenerator.generateBookingCode();
         newBooking.setBookingCode(bookingCode);
@@ -91,6 +100,8 @@ public class BookingService {
         BookingInformation response = bookingResponseMapper.constructBookingResponse(newBooking);
 
         bookingRepository.save(newBooking);
+
+        addJobScheduler(newBooking);
 
         return ApiResponse.success("Success booking created", response);
     }
@@ -104,6 +115,24 @@ public class BookingService {
 
         return ApiResponse.success("Booking found", response);
 
+    }
+
+    public void addJobScheduler(Booking booking) throws Exception{
+        JobDetail jobDetail = JobBuilder.newJob(ExpireBookingJob.class)
+                .withIdentity("expire-trigger-"+booking.getBookingCode())
+                .usingJobData("bookingCode", booking.getBookingCode())
+                .build();
+
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .withIdentity("expire-trigger-" + booking.getBookingCode())
+                .startAt(Date.from(
+                        booking.getTimeLimitPayment()
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant()
+                ))
+                .build();
+
+        scheduler.scheduleJob(jobDetail, trigger);
     }
 
 }

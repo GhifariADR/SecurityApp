@@ -24,4 +24,9 @@ public class PaymentController {
     public ResponseEntity<ApiResponse<?>> callbackBooking(@RequestBody MidtransNotification notification) throws MidtransError {
         return ResponseEntity.ok(paymentService.callback(notification));
     }
+
+    @PostMapping("/{bookingCode}/status")
+    public ResponseEntity<ApiResponse<?>> paymentStatus(@PathVariable String bookingCode) throws MidtransError {
+        return ResponseEntity.ok(paymentService.checkPaymentStatus(bookingCode));
+    }
 }
