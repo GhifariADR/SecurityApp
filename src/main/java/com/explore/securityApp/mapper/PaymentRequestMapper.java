@@ -30,6 +30,13 @@ public class PaymentRequestMapper {
         serviceFee.put("quantity", 1);
         serviceFee.put("name", "Service fee");
 
+        Map<String, Object> customerDetail = new HashMap<>();
+        customerDetail.put("first_name", booking.getUser().getUsername());
+        customerDetail.put("email", booking.getUser().getEmail());
+
+        List<Map<String, Object>> customerDetails = new ArrayList<>();
+        customerDetails.add(customerDetail);
+
         List<Map<String, Object>> itemDetails = new ArrayList<>();
         itemDetails.add(item);
         itemDetails.add(serviceFee);
